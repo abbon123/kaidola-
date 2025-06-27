@@ -447,6 +447,15 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
         
         <div class="betting-form">
             <h3>🎯 下注區</h3>
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #856404;">🏆 獎池分配規則</h4>
+                <p style="margin: 0; font-size: 14px; color: #856404;">
+                    • 所有下注進入獎池，莊家抽取 <strong>10%</strong> 手續費<br>
+                    • 獲勝者按照「下注金額 × 權重」分配獎池<br>
+                    • 區間越短權重越高，獲得獎金比例越大<br>
+                    • <strong>最多只能設定 10 天區間</strong>
+                </p>
+            </div>
             <div class="form-group">
                 <label for="playerName">玩家姓名：</label>
                 <input type="text" id="playerName" placeholder="輸入你的名字">
@@ -662,25 +671,41 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
             const end = new Date(endDate);
             const range = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
             
-            // 更合理的賠率系統：區間越小賠率越高，但不會太誇張
+            // 限制最大區間為10天
+            if (range > 10) {
+                return null; // 表示區間太大，不允許下注
+            }
+            
+            // 基於區間大小的基礎賠率
             let baseOdds;
             if (range === 1) {
-                baseOdds = 8;   // 1天 = 8倍
-            } else if (range <= 3) {
-                baseOdds = 4;   // 2-3天 = 4倍
+                baseOdds = 5;   // 1天
+            } else if (range === 2) {
+                baseOdds = 3;   // 2天
+            } else if (range === 3) {
+                baseOdds = 2.5; // 3天
+            } else if (range <= 5) {
+                baseOdds = 2;   // 4-5天
             } else if (range <= 7) {
-                baseOdds = 2.5; // 4-7天 = 2.5倍
-            } else if (range <= 14) {
-                baseOdds = 2;   // 8-14天 = 2倍
-            } else if (range <= 30) {
-                baseOdds = 1.5; // 15-30天 = 1.5倍
-            } else if (range <= 60) {
-                baseOdds = 1.3; // 31-60天 = 1.3倍
-            } else {
-                baseOdds = 1.1; // 60天以上 = 1.1倍
+                baseOdds = 1.8; // 6-7天
+            } else { // 8-10天
+                baseOdds = 1.5;
             }
             
             return Math.round(baseOdds * 10) / 10;
+        }
+
+        function calculatePoolPayout() {
+            const HOUSE_EDGE = 0.1; // 10% 莊家抽成
+            const totalBets = bets.reduce((sum, bet) => sum + bet.betAmount, 0);
+            const houseCut = totalBets * HOUSE_EDGE;
+            const prizePool = totalBets - houseCut;
+            
+            return {
+                totalBets,
+                houseCut: Math.round(houseCut),
+                prizePool: Math.round(prizePool)
+            };
         }
 
         function formatDate(dateString) {
@@ -722,7 +747,7 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
             }
 
             const odds = calculateOdds(startDate, endDate);
-            const potentialWin = Math.round(betAmount * odds);
+            const payoutInfo = calculatePayout(betAmount, odds);
 
             try {
                 document.getElementById('placeBetBtn').disabled = true;
@@ -736,7 +761,7 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
                         start_date: startDate,
                         end_date: endDate,
                         odds: odds,
-                        potential_win: potentialWin
+                        potential_win: payoutInfo.netPayout
                     }]);
                 
                 if (error) throw error;
@@ -747,7 +772,9 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
                     <strong>${playerName}</strong> 下注成功！<br>
                     預測區間：${formatDate(startDate)} - ${formatDate(endDate)} (${rangeDays} 天)<br>
                     賠率：${odds}x<br>
-                    可能獲得：$${potentialWin}
+                    理論獲得：${payoutInfo.grossPayout}<br>
+                    莊家抽成：${payoutInfo.houseCut} (15%)<br>
+                    <strong>實際可得：${payoutInfo.netPayout}</strong>
                 `;
                 document.getElementById('result').style.display = 'block';
 
@@ -819,16 +846,52 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
                 gameEnded = true;
                 const actualDateObj = new Date(actualDate);
                 
-                // 更新所有賭注的獲勝狀態
-                for (const bet of bets) {
+                // 找出所有獲勝者
+                const winners = [];
+                bets.forEach(bet => {
                     const startDateObj = new Date(bet.startDate);
                     const endDateObj = new Date(bet.endDate);
                     const isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
                     
-                    await supabase
-                        .from('bets')
-                        .update({ is_winner: isWinner })
-                        .eq('id', bet.id);
+                    if (isWinner) {
+                        winners.push({
+                            ...bet,
+                            weight: bet.betAmount * bet.odds // 計算權重
+                        });
+                    }
+                });
+                
+                // 計算獎池分配
+                const poolInfo = calculatePoolPayout();
+                let totalWeight = 0;
+                
+                if (winners.length > 0) {
+                    totalWeight = winners.reduce((sum, winner) => sum + winner.weight, 0);
+                    
+                    // 按權重分配獎池
+                    for (const winner of winners) {
+                        const share = (winner.weight / totalWeight) * poolInfo.prizePool;
+                        const payout = Math.round(share);
+                        
+                        await supabase
+                            .from('bets')
+                            .update({ 
+                                is_winner: true,
+                                potential_win: payout
+                            })
+                            .eq('id', winner.id);
+                    }
+                } else {
+                    // 沒有獲勝者，所有人標記為失敗
+                    for (const bet of bets) {
+                        await supabase
+                            .from('bets')
+                            .update({ 
+                                is_winner: false,
+                                potential_win: 0
+                            })
+                            .eq('id', bet.id);
+                    }
                 }
                 
                 // 更新遊戲狀態
