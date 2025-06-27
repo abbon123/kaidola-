@@ -36,13 +36,59 @@
         }
         
         .sync-status {
-            background: linear-gradient(135deg, #4299e1, #3182ce);
-            color: white;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
             text-align: center;
             font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .sync-status.connecting {
+            background: linear-gradient(135deg, #f6ad55, #ed8936);
+            color: white;
+        }
+        
+        .sync-status.connected {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+        
+        .sync-status.error {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+        
+        .config-section {
+            background: #fef5e7;
+            border: 2px solid #f6ad55;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .config-section h3 {
+            color: #c05621;
+            margin-top: 0;
+        }
+        
+        .config-input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #d69e2e;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
+        .config-btn {
+            background: #d69e2e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
         }
         
         .betting-form {
@@ -147,7 +193,7 @@
             min-width: 80px;
         }
         
-        .edit-btn, .delete-btn, .save-btn, .cancel-btn {
+        .edit-btn, .delete-btn {
             padding: 5px 10px;
             border: none;
             border-radius: 5px;
@@ -164,36 +210,6 @@
         .delete-btn {
             background: #e53e3e;
             color: white;
-        }
-        
-        .save-btn {
-            background: #48bb78;
-            color: white;
-        }
-        
-        .cancel-btn {
-            background: #718096;
-            color: white;
-        }
-        
-        .edit-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .edit-inputs input {
-            padding: 5px 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .edit-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
         }
         
         .bet-info {
@@ -226,16 +242,41 @@
             margin-top: 10px;
         }
         
-        .data-management {
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #805ad5, #6b46c1);
-            border-radius: 15px;
-            color: white;
+        .online-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #48bb78;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
         }
         
-        .data-btn {
+        .offline-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #a0aec0;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .deploy-info {
+            background: linear-gradient(135deg, #805ad5, #6b46c1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .deploy-btn {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -246,65 +287,8 @@
             transition: all 0.3s ease;
         }
         
-        .data-btn:hover {
+        .deploy-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .share-section {
-            background: linear-gradient(135deg, #38b2ac, #319795);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .share-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 5px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        
-        .share-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4299e1;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 12px;
         }
     </style>
 </head>
@@ -315,27 +299,50 @@
             <p>預測隔壁全家何時開幕，區間越短賠率越高！</p>
         </div>
         
-        <div class="sync-status">
-            ✨ 已準備就緒！使用匯出/匯入功能來同步資料
+        <div id="syncStatus" class="sync-status connecting">
+            <span class="offline-indicator"></span>
+            🔄 正在初始化...
         </div>
         
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalBets">0</div>
-                <div class="stat-label">總賭注數</div>
+        <div id="configSection" class="config-section">
+            <h3>🔧 Supabase 設定</h3>
+            <p>要啟用即時同步，請輸入你的 Supabase 設定：</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Supabase URL:</label>
+                    <input type="text" id="supabaseUrl" class="config-input" 
+                           placeholder="https://xxx.supabase.co"
+                           value="https://sgvdqekhfmxbdlmhzxle.supabase.co">
+                </div>
+                <div>
+                    <label>API Key:</label>
+                    <input type="text" id="supabaseKey" class="config-input" 
+                           placeholder="eyJhbGc..."
+                           value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndmRxZWtoZm14YmRsbWh6eGxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwMTQwMTQsImV4cCI6MjA2NjU5MDAxNH0.yoBCi83-8_vRfUUa1PuHLpxeJthq7meULZqRoihYd3U">
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalAmount">$0</div>
-                <div class="stat-label">總下注金額</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="avgOdds">0x</div>
-                <div class="stat-label">平均賠率</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalPrize">$0</div>
-                <div class="stat-label">總獎金池</div>
-            </div>
+            <button class="config-btn" onclick="connectToSupabase()">🔗 連接 Supabase</button>
+            <button class="config-btn" onclick="useOfflineMode()">📱 使用離線模式</button>
+            
+            <details style="margin-top: 15px;">
+                <summary style="cursor: pointer; color: #c05621; font-weight: bold;">📋 如何設定 Supabase？</summary>
+                <div style="margin-top: 10px; font-size: 14px;">
+                    <ol>
+                        <li>到 <a href="https://supabase.com" target="_blank">supabase.com</a> 註冊</li>
+                        <li>建立新專案</li>
+                        <li>到 Settings > API 取得 URL 和 anon key</li>
+                        <li>到 SQL Editor 執行建表指令（程式會提供）</li>
+                        <li>貼上設定到上面的欄位並點擊連接</li>
+                    </ol>
+                </div>
+            </details>
+        </div>
+        
+        <div class="deploy-info" id="deployInfo" style="display: none;">
+            <h4>🚀 部署到 GitHub Pages</h4>
+            <p>要讓朋友也能使用，把這個網頁部署到 GitHub Pages：</p>
+            <button class="deploy-btn" onclick="copyHTML()">📄 複製網頁程式碼</button>
+            <button class="deploy-btn" onclick="showDeploySteps()">📖 查看部署教學</button>
         </div>
         
         <div class="betting-form">
@@ -365,30 +372,14 @@
                 <small style="color: #666; margin-top: 5px; display: block;">選擇你認為全家可能開幕的日期區間</small>
             </div>
             
-            <button class="calculate-btn" onclick="placeBet()" id="placeBetBtn">計算賠率並下注</button>
+            <button class="calculate-btn" onclick="placeBet()" id="placeBetBtn" disabled>請先設定連接</button>
             
             <div id="result" class="result"></div>
         </div>
         
         <div class="bets-list">
-            <h3>📊 目前賭注</h3>
-            <div id="betsList"></div>
-        </div>
-        
-        <div class="data-management">
-            <h4>📁 資料管理</h4>
-            <p>使用以下功能來備份和分享賭盤資料</p>
-            <button class="data-btn" onclick="exportData()">📤 匯出資料</button>
-            <button class="data-btn" onclick="importData()">📥 匯入資料</button>
-            <button class="data-btn" onclick="clearAllData()">🗑️ 清空資料</button>
-            <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFileImport(event)">
-        </div>
-        
-        <div class="share-section">
-            <h4>🚀 部署分享</h4>
-            <p>想要分享給朋友？把這個 HTML 檔案上傳到 GitHub Pages！</p>
-            <button class="share-btn" onclick="showDeployInstructions()">📋 查看部署教學</button>
-            <button class="share-btn" onclick="copyPageHTML()">📄 複製網頁程式碼</button>
+            <h3>📊 目前賭注 <span id="betCount">(0)</span></h3>
+            <div id="betsList">等待連接...</div>
         </div>
         
         <div class="betting-form">
@@ -406,12 +397,203 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
+        let supabase = null;
         let bets = [];
         let gameEnded = false;
+        let isConnected = false;
 
-        // 載入保存的資料
-        function loadSavedData() {
+        function updateSyncStatus(status, message, isOnline = false) {
+            const statusEl = document.getElementById('syncStatus');
+            const indicator = isOnline ? 
+                '<span class="online-indicator"></span>' : 
+                '<span class="offline-indicator"></span>';
+            
+            statusEl.className = `sync-status ${status}`;
+            statusEl.innerHTML = indicator + message;
+        }
+
+        async function connectToSupabase() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) {
+                alert('請填寫 Supabase URL 和 API Key');
+                return;
+            }
+            
+            try {
+                updateSyncStatus('connecting', '🔄 正在連接 Supabase...');
+                
+                // 建立 Supabase 客戶端
+                supabase = window.supabase.createClient(url, key);
+                
+                // 測試連接
+                const { data, error } = await supabase
+                    .from('bets')
+                    .select('count', { count: 'exact' });
+                
+                if (error) {
+                    if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
+                        updateSyncStatus('error', '⚠️ 需要建立資料表');
+                        showCreateTableInstructions();
+                        return;
+                    }
+                    throw error;
+                }
+                
+                isConnected = true;
+                updateSyncStatus('connected', '✅ Supabase 連接成功！即時同步已啟用', true);
+                
+                // 隱藏設定區域
+                document.getElementById('configSection').style.display = 'none';
+                document.getElementById('deployInfo').style.display = 'block';
+                
+                // 啟用功能
+                document.getElementById('placeBetBtn').disabled = false;
+                document.getElementById('placeBetBtn').textContent = '計算賠率並下注';
+                
+                // 載入資料並設定即時監聽
+                setupRealtimeListeners();
+                await loadBets();
+                await loadGameState();
+                
+            } catch (error) {
+                updateSyncStatus('error', '❌ 連接失敗: ' + error.message);
+                console.error('Supabase 連接失敗:', error);
+            }
+        }
+
+        function useOfflineMode() {
+            updateSyncStatus('error', '📱 離線模式 - 資料僅保存在本地');
+            document.getElementById('configSection').style.display = 'none';
+            document.getElementById('deployInfo').style.display = 'block';
+            
+            document.getElementById('placeBetBtn').disabled = false;
+            document.getElementById('placeBetBtn').textContent = '計算賠率並下注';
+            
+            loadLocalData();
+        }
+
+        function setupRealtimeListeners() {
+            // 監聽賭注變化
+            supabase
+                .channel('bets')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'bets' }, payload => {
+                    console.log('賭注變化:', payload);
+                    loadBets();
+                })
+                .subscribe();
+            
+            // 監聽遊戲狀態變化
+            supabase
+                .channel('game_state')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'game_state' }, payload => {
+                    console.log('遊戲狀態變化:', payload);
+                    loadGameState();
+                })
+                .subscribe();
+        }
+
+        function showCreateTableInstructions() {
+            const instructions = `
+                <div style="background: #fef5e7; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                    <h4>📋 請到 Supabase SQL Editor 執行：</h4>
+                    <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
+CREATE TABLE IF NOT EXISTS bets (
+    id BIGSERIAL PRIMARY KEY,
+    player_name TEXT NOT NULL,
+    bet_amount INTEGER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    odds DECIMAL NOT NULL,
+    potential_win INTEGER NOT NULL,
+    is_winner BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS game_state (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    game_ended BOOLEAN DEFAULT FALSE,
+    actual_date DATE,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO game_state (id, game_ended) VALUES (1, FALSE) ON CONFLICT (id) DO NOTHING;
+
+-- 設定 RLS
+ALTER TABLE bets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE game_state ENABLE ROW LEVEL SECURITY;
+
+-- 允許所有操作的政策
+CREATE POLICY "Enable all operations for bets" ON bets FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING (true) WITH CHECK (true);
+                    </pre>
+                    <button onclick="connectToSupabase()" style="background: #48bb78; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer;">執行完成後重新連接</button>
+                </div>
+            `;
+            document.getElementById('betsList').innerHTML = instructions;
+        }
+
+        async function loadBets() {
+            try {
+                if (!isConnected) return;
+                
+                const { data, error } = await supabase
+                    .from('bets')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+                
+                if (error) throw error;
+                
+                bets = data.map(bet => ({
+                    id: bet.id,
+                    playerName: bet.player_name,
+                    betAmount: bet.bet_amount,
+                    startDate: bet.start_date,
+                    endDate: bet.end_date,
+                    odds: bet.odds,
+                    potentialWin: bet.potential_win,
+                    isWinner: bet.is_winner
+                }));
+                
+                updateBetsList();
+                
+            } catch (error) {
+                console.error('載入賭注失敗:', error);
+            }
+        }
+
+        async function loadGameState() {
+            try {
+                if (!isConnected) return;
+                
+                const { data, error } = await supabase
+                    .from('game_state')
+                    .select('*')
+                    .eq('id', 1)
+                    .single();
+                
+                if (error) {
+                    console.log('遊戲狀態不存在，使用預設值');
+                    return;
+                }
+                
+                gameEnded = data.game_ended;
+                updateGameState();
+                
+                if (gameEnded && data.actual_date) {
+                    displayFinalResult(data.actual_date);
+                }
+                
+            } catch (error) {
+                console.error('載入遊戲狀態失敗:', error);
+            }
+        }
+
+        function loadLocalData() {
             const savedData = localStorage.getItem('familyMartBetting');
             if (savedData) {
                 try {
@@ -420,19 +602,19 @@
                     gameEnded = data.gameEnded || false;
                     updateBetsList();
                     updateGameState();
-                    updateStats();
                     
                     if (gameEnded && data.actualDate) {
                         displayFinalResult(data.actualDate);
                     }
                 } catch (error) {
-                    console.error('載入資料失敗:', error);
+                    console.error('載入本地資料失敗:', error);
                 }
+            } else {
+                updateBetsList();
             }
         }
 
-        // 保存資料
-        function saveData() {
+        function saveLocalData() {
             const data = {
                 bets: bets,
                 gameEnded: gameEnded,
@@ -455,7 +637,7 @@
             return `${date.getMonth() + 1}/${date.getDate()}`;
         }
 
-        function placeBet() {
+        async function placeBet() {
             if (gameEnded) {
                 alert('遊戲已結束，無法再下注！');
                 return;
@@ -486,33 +668,58 @@
             const odds = calculateOdds(startDate, endDate);
             const potentialWin = Math.round(betAmount * odds);
 
-            const bet = {
-                id: Date.now(),
-                playerName,
-                betAmount,
-                startDate,
-                endDate,
-                odds,
-                potentialWin,
-                timestamp: Date.now()
-            };
+            try {
+                document.getElementById('placeBetBtn').disabled = true;
+                document.getElementById('placeBetBtn').textContent = '下注中...';
 
-            bets.push(bet);
-            
-            const rangeDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
-            
-            document.getElementById('result').innerHTML = `
-                <strong>${playerName}</strong> 下注成功！<br>
-                預測區間：${formatDate(startDate)} - ${formatDate(endDate)} (${rangeDays} 天)<br>
-                賠率：${odds}x<br>
-                可能獲得：$${potentialWin}
-            `;
-            document.getElementById('result').style.display = 'block';
+                if (isConnected) {
+                    const { data, error } = await supabase
+                        .from('bets')
+                        .insert([{
+                            player_name: playerName,
+                            bet_amount: betAmount,
+                            start_date: startDate,
+                            end_date: endDate,
+                            odds: odds,
+                            potential_win: potentialWin
+                        }]);
+                    
+                    if (error) throw error;
+                } else {
+                    // 離線模式
+                    const bet = {
+                        id: Date.now(),
+                        playerName,
+                        betAmount,
+                        startDate,
+                        endDate,
+                        odds,
+                        potentialWin,
+                        isWinner: false
+                    };
+                    bets.push(bet);
+                    updateBetsList();
+                    saveLocalData();
+                }
 
-            updateBetsList();
-            updateStats();
-            clearForm();
-            saveData();
+                const rangeDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                
+                document.getElementById('result').innerHTML = `
+                    <strong>${playerName}</strong> 下注成功！<br>
+                    預測區間：${formatDate(startDate)} - ${formatDate(endDate)} (${rangeDays} 天)<br>
+                    賠率：${odds}x<br>
+                    可能獲得：$${potentialWin}
+                `;
+                document.getElementById('result').style.display = 'block';
+
+                clearForm();
+
+            } catch (error) {
+                alert('下注失敗: ' + error.message);
+            } finally {
+                document.getElementById('placeBetBtn').disabled = false;
+                document.getElementById('placeBetBtn').textContent = '計算賠率並下注';
+            }
         }
 
         function updateBetsList() {
@@ -520,42 +727,12 @@
             
             if (bets.length === 0) {
                 betsList.innerHTML = '<p style="text-align: center; color: #666;">目前還沒有人下注</p>';
-                return;
-            }
-
-            let html = '';
-            
-            bets.forEach(bet => {
-                const rangeDays = Math.ceil((new Date(bet.endDate) - new Date(bet.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+            } else {
+                let html = '';
                 
-                if (bet.editing === true) {
-                    html += `
-                        <div class="bet-item ${bet.isWinner ? 'winner' : ''}">
-                            <div class="bet-info" style="flex: 1;">
-                                <div class="edit-inputs">
-                                    <div class="edit-row">
-                                        <label>姓名：</label>
-                                        <input type="text" id="edit-name-${bet.id}" value="${bet.playerName}">
-                                    </div>
-                                    <div class="edit-row">
-                                        <label>金額：</label>
-                                        <input type="number" id="edit-amount-${bet.id}" value="${bet.betAmount}">
-                                    </div>
-                                    <div class="edit-row">
-                                        <label>開始：</label>
-                                        <input type="date" id="edit-start-${bet.id}" value="${bet.startDate}">
-                                        <label>結束：</label>
-                                        <input type="date" id="edit-end-${bet.id}" value="${bet.endDate}">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bet-actions">
-                                <button class="save-btn" onclick="saveBet(${bet.id})">儲存</button>
-                                <button class="cancel-btn" onclick="cancelEdit(${bet.id})">取消</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
+                bets.forEach(bet => {
+                    const rangeDays = Math.ceil((new Date(bet.endDate) - new Date(bet.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                    
                     html += `
                         <div class="bet-item ${bet.isWinner ? 'winner' : ''}">
                             <div class="bet-info">
@@ -565,90 +742,17 @@
                                 下注：$${bet.betAmount} | 賠率：${bet.odds}x | 可贏：$${bet.potentialWin}
                                 ${bet.isWinner ? ' - 🎉 獲勝！' : ''}
                             </div>
-                            <div class="bet-actions">
-                                ${gameEnded ? '' : `
-                                    <button class="edit-btn" onclick="editBet(${bet.id})">✏️ 編輯</button>
-                                    <button class="delete-btn" onclick="deleteBet(${bet.id})">🗑️ 刪除</button>
-                                `}
-                            </div>
                         </div>
                     `;
-                }
-            });
+                });
+                
+                betsList.innerHTML = html;
+            }
             
-            betsList.innerHTML = html;
+            document.getElementById('betCount').textContent = `(${bets.length})`;
         }
 
-        function updateStats() {
-            const totalBets = bets.length;
-            const totalAmount = bets.reduce((sum, bet) => sum + bet.betAmount, 0);
-            const avgOdds = totalBets > 0 ? (bets.reduce((sum, bet) => sum + bet.odds, 0) / totalBets).toFixed(1) : 0;
-            const totalPrize = bets.reduce((sum, bet) => sum + bet.potentialWin, 0);
-
-            document.getElementById('totalBets').textContent = totalBets;
-            document.getElementById('totalAmount').textContent = `$${totalAmount}`;
-            document.getElementById('avgOdds').textContent = `${avgOdds}x`;
-            document.getElementById('totalPrize').textContent = `$${totalPrize}`;
-        }
-
-        function editBet(betId) {
-            const bet = bets.find(b => b.id === betId);
-            if (bet) {
-                bet.editing = true;
-                updateBetsList();
-            }
-        }
-
-        function cancelEdit(betId) {
-            const bet = bets.find(b => b.id === betId);
-            if (bet) {
-                bet.editing = false;
-                updateBetsList();
-            }
-        }
-
-        function saveBet(betId) {
-            const bet = bets.find(b => b.id === betId);
-            if (!bet) return;
-
-            const newName = document.getElementById(`edit-name-${betId}`).value.trim();
-            const newAmount = parseInt(document.getElementById(`edit-amount-${betId}`).value);
-            const newStartDate = document.getElementById(`edit-start-${betId}`).value;
-            const newEndDate = document.getElementById(`edit-end-${betId}`).value;
-
-            if (!newName || !newAmount || !newStartDate || !newEndDate) {
-                alert('請填寫完整資訊！');
-                return;
-            }
-
-            if (new Date(newStartDate) > new Date(newEndDate)) {
-                alert('結束日期必須晚於或等於開始日期！');
-                return;
-            }
-
-            bet.playerName = newName;
-            bet.betAmount = newAmount;
-            bet.startDate = newStartDate;
-            bet.endDate = newEndDate;
-            bet.odds = calculateOdds(newStartDate, newEndDate);
-            bet.potentialWin = Math.round(newAmount * bet.odds);
-            bet.editing = false;
-
-            updateBetsList();
-            updateStats();
-            saveData();
-        }
-
-        function deleteBet(betId) {
-            if (confirm('確定要刪除這筆賭注嗎？')) {
-                bets = bets.filter(bet => bet.id !== betId);
-                updateBetsList();
-                updateStats();
-                saveData();
-            }
-        }
-
-        function announceResult() {
+        async function announceResult() {
             const adminPassword = document.getElementById('adminPassword').value;
             const actualDate = document.getElementById('actualDate').value;
             
@@ -663,25 +767,50 @@
                 return;
             }
 
-            gameEnded = true;
-            
-            const actualDateObj = new Date(actualDate);
-            const winners = [];
-            
-            bets.forEach(bet => {
-                const startDateObj = new Date(bet.startDate);
-                const endDateObj = new Date(bet.endDate);
-                bet.isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
+            try {
+                gameEnded = true;
+                const actualDateObj = new Date(actualDate);
                 
-                if (bet.isWinner) {
-                    winners.push(bet);
+                if (isConnected) {
+                    // 更新所有賭注的獲勝狀態
+                    for (const bet of bets) {
+                        const startDateObj = new Date(bet.startDate);
+                        const endDateObj = new Date(bet.endDate);
+                        const isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
+                        
+                        await supabase
+                            .from('bets')
+                            .update({ is_winner: isWinner })
+                            .eq('id', bet.id);
+                    }
+                    
+                    // 更新遊戲狀態
+                    await supabase
+                        .from('game_state')
+                        .update({ 
+                            game_ended: true, 
+                            actual_date: actualDate 
+                        })
+                        .eq('id', 1);
+                } else {
+                    // 離線模式
+                    bets.forEach(bet => {
+                        const startDateObj = new Date(bet.startDate);
+                        const endDateObj = new Date(bet.endDate);
+                        bet.isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
+                    });
+                    updateBetsList();
+                    saveLocalData();
                 }
-            });
 
-            displayFinalResult(actualDate);
-            updateBetsList();
-            updateGameState();
-            saveData();
+                displayFinalResult(actualDate);
+                updateGameState();
+                
+                alert('✅ 開獎完成！');
+
+            } catch (error) {
+                alert('開獎失敗: ' + error.message);
+            }
         }
 
         function displayFinalResult(actualDate) {
@@ -716,106 +845,10 @@
             if (gameEnded) {
                 placeBetBtn.disabled = true;
                 placeBetBtn.textContent = '遊戲已結束';
-            } else {
+            } else if (placeBetBtn.textContent !== '下注中...') {
                 placeBetBtn.disabled = false;
                 placeBetBtn.textContent = '計算賠率並下注';
             }
-        }
-
-        function exportData() {
-            const data = {
-                bets: bets,
-                gameEnded: gameEnded,
-                actualDate: gameEnded ? document.getElementById('actualDate').value : null,
-                exportTime: new Date().toISOString(),
-                version: '2.0'
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `family-mart-betting-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            alert('資料已匯出！可以分享給其他人或作為備份。');
-        }
-
-        function importData() {
-            document.getElementById('fileInput').click();
-        }
-
-        function handleFileImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.bets && Array.isArray(data.bets)) {
-                        if (confirm('匯入資料將覆蓋現有資料，確定要繼續嗎？')) {
-                            bets = data.bets;
-                            gameEnded = data.gameEnded || false;
-                            
-                            if (data.actualDate) {
-                                document.getElementById('actualDate').value = data.actualDate;
-                            }
-                            
-                            updateBetsList();
-                            updateStats();
-                            updateGameState();
-                            saveData();
-                            alert('資料匯入成功！');
-                            
-                            if (gameEnded && data.actualDate) {
-                                displayFinalResult(data.actualDate);
-                            }
-                        }
-                    } else {
-                        alert('檔案格式不正確！');
-                    }
-                } catch (error) {
-                    alert('檔案讀取失敗：' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function clearAllData() {
-            if (confirm('確定要清空所有資料嗎？此操作無法復原！')) {
-                bets = [];
-                gameEnded = false;
-                localStorage.removeItem('familyMartBetting');
-                updateBetsList();
-                updateStats();
-                updateGameState();
-                document.getElementById('finalResult').style.display = 'none';
-                alert('所有資料已清空！');
-            }
-        }
-
-        function showDeployInstructions() {
-            alert(`🚀 GitHub Pages 部署教學：
-
-1. 複製這個網頁的完整程式碼
-2. 到 GitHub 建立新的 repository
-3. 建立 index.html 檔案並貼上程式碼
-4. 到 Settings > Pages 啟用 GitHub Pages
-5. 幾分鐘後就有網址可以分享了！
-
-詳細步驟可以問 ChatGPT 或 Google "GitHub Pages 教學"`);
-        }
-
-        function copyPageHTML() {
-            const html = document.documentElement.outerHTML;
-            navigator.clipboard.writeText(html).then(() => {
-                alert('✅ 網頁程式碼已複製到剪貼簿！可以貼到記事本存成 .html 檔案。');
-            }).catch(() => {
-                alert('❌ 複製失敗，請手動選取網頁內容複製。');
-            });
         }
 
         function clearForm() {
@@ -825,11 +858,30 @@
             document.getElementById('endDate').value = '';
         }
 
+        function copyHTML() {
+            const html = document.documentElement.outerHTML;
+            navigator.clipboard.writeText(html).then(() => {
+                alert('✅ 網頁程式碼已複製！可以貼到記事本存成 .html 檔案，然後上傳到 GitHub Pages。');
+            }).catch(() => {
+                alert('❌ 複製失敗，請手動選取網頁內容複製。');
+            });
+        }
+
+        function showDeploySteps() {
+            alert(`🚀 GitHub Pages 部署步驟：
+
+1. 複製網頁程式碼（點上面的按鈕）
+2. 到 GitHub 建立新的 repository
+3. 建立 index.html 檔案並貼上程式碼
+4. 到 Settings > Pages 選擇 main branch
+5. 等幾分鐘就有網址了！
+
+部署後所有人都能訪問，而且 Supabase 連接會正常運作！`);
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
-            loadSavedData();
-            updateStats();
-            updateGameState();
+            updateSyncStatus('connecting', '🔄 等待設定...');
         });
     </script>
 </body>
