@@ -192,6 +192,130 @@
             min-width: 0;
         }
         
+        .bet-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+        
+        .edit-bet-btn, .delete-bet-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-bet-btn {
+            background: #4299e1;
+        }
+        
+        .edit-bet-btn:hover {
+            background: #3182ce;
+        }
+        
+        .delete-bet-btn {
+            background: #e53e3e;
+        }
+        
+        .delete-bet-btn:hover {
+            background: #c53030;
+        }
+        
+        .admin-section {
+            background: #fdf2f8;
+            border: 2px solid #ec4899;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-section h3 {
+            color: #be185d;
+            margin-top: 0;
+        }
+        
+        .admin-btn {
+            background: #dc2626;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-btn:hover {
+            background: #b91c1c;
+        }
+        
+        .admin-btn.edit {
+            background: #4299e1;
+        }
+        
+        .admin-btn.edit:hover {
+            background: #3182ce;
+        }
+        
+        .bet-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+        
+        .edit-bet-btn, .delete-bet-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-bet-btn {
+            background: #4299e1;
+        }
+        
+        .edit-bet-btn:hover {
+            background: #3182ce;
+        }
+        
+        .delete-bet-btn {
+            background: #e53e3e;
+        }
+        
+        .delete-bet-btn:hover {
+            background: #c53030;
+        }
+        
+        .admin-section {
+            background: #fdf2f8;
+            border: 2px solid #ec4899;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-section h3 {
+            color: #be185d;
+            margin-top: 0;
+        }
+        
+        .clear-all-btn {
+            background: #dc2626;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            
+        
         .winner {
             background: linear-gradient(135deg, #48bb78, #38a169);
             color: white;
@@ -356,6 +480,20 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
         <div class="bets-list">
             <h3>📊 目前賭注 <span id="betCount">(0)</span></h3>
             <div id="betsList">連接中...</div>
+        </div>
+        
+        <div class="admin-section">
+            <h3>🔧 管理員功能</h3>
+            <div class="form-group">
+                <label for="adminPasswordForManage">管理員密碼：</label>
+                <input type="password" id="adminPasswordForManage" placeholder="請輸入管理員密碼">
+            </div>
+            <button class="admin-btn" onclick="clearAllBets()">🗑️ 清空所有賭注</button>
+            <button class="admin-btn" onclick="resetGame()">🔄 重置遊戲</button>
+            <small style="display: block; margin-top: 10px; color: #666;">
+                清空所有賭注：只刪除賭注資料<br>
+                重置遊戲：清空賭注 + 重置開獎狀態
+            </small>
         </div>
         
         <div class="betting-form">
@@ -640,8 +778,12 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
                                 <strong>${bet.playerName}</strong> - 
                                 ${formatDate(bet.startDate)} - ${formatDate(bet.endDate)} 
                                 (${rangeDays} 天區間)<br>
-                                下注：$${bet.betAmount} | 賠率：${bet.odds}x | 可贏：$${bet.potentialWin}
+                                下注：${bet.betAmount} | 賠率：${bet.odds}x | 可贏：${bet.potentialWin}
                                 ${bet.isWinner ? ' - 🎉 獲勝！' : ''}
+                            </div>
+                            <div class="bet-actions">
+                                <button class="edit-bet-btn" onclick="editBet(${bet.id})">編輯</button>
+                                <button class="delete-bet-btn" onclick="deleteBet(${bet.id})">刪除</button>
                             </div>
                         </div>
                     `;
@@ -772,6 +914,146 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
 5. 等幾分鐘就有網址了！
 
 部署後所有人都能訪問，資料庫連接會正常運作！`);
+        }
+
+        function checkAdminPassword() {
+            const password = document.getElementById('adminPasswordForManage').value;
+            if (password !== 'tony123') {
+                alert('❌ 管理員密碼錯誤！');
+                document.getElementById('adminPasswordForManage').value = '';
+                return false;
+            }
+            return true;
+        }
+
+        async function clearAllBets() {
+            if (!checkAdminPassword()) return;
+            
+            if (!confirm('⚠️ 確定要清空所有賭注嗎？此操作無法復原！')) {
+                return;
+            }
+
+            if (!isConnected) {
+                alert('資料庫未連接！');
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('bets')
+                    .delete()
+                    .neq('id', 0); // 刪除所有記錄
+                
+                if (error) throw error;
+                
+                bets = [];
+                updateBetsList();
+                alert('✅ 所有賭注已清空！');
+                
+            } catch (error) {
+                alert('清空失敗: ' + error.message);
+            }
+        }
+
+        async function resetGame() {
+            if (!checkAdminPassword()) return;
+            
+            if (!confirm('⚠️ 確定要重置整個遊戲嗎？這會清空所有賭注並重置開獎狀態！')) {
+                return;
+            }
+
+            if (!isConnected) {
+                alert('資料庫未連接！');
+                return;
+            }
+
+            try {
+                // 清空所有賭注
+                await supabase.from('bets').delete().neq('id', 0);
+                
+                // 重置遊戲狀態
+                await supabase
+                    .from('game_state')
+                    .update({ 
+                        game_ended: false, 
+                        actual_date: null 
+                    })
+                    .eq('id', 1);
+                
+                // 重置本地狀態
+                bets = [];
+                gameEnded = false;
+                
+                // 更新界面
+                updateBetsList();
+                updateGameState();
+                document.getElementById('finalResult').style.display = 'none';
+                document.getElementById('actualDate').value = '';
+                
+                alert('✅ 遊戲已完全重置！');
+                
+            } catch (error) {
+                alert('重置失敗: ' + error.message);
+            }
+        }
+
+        async function deleteBet(betId) {
+            if (!checkAdminPassword()) return;
+            
+            if (!confirm('確定要刪除這個賭注嗎？')) {
+                return;
+            }
+            
+            if (!isConnected) {
+                alert('資料庫未連接！');
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('bets')
+                    .delete()
+                    .eq('id', betId);
+                
+                if (error) throw error;
+                
+                alert('✅ 賭注已刪除！');
+                // 資料會透過即時監聽自動更新
+                
+            } catch (error) {
+                alert('刪除失敗: ' + error.message);
+            }
+        }
+
+        async function editBet(betId) {
+            if (!checkAdminPassword()) return;
+            
+            const bet = bets.find(b => b.id === betId);
+            if (!bet) {
+                alert('找不到該賭注！');
+                return;
+            }
+            
+            // 填入表單讓用戶編輯
+            document.getElementById('playerName').value = bet.playerName;
+            document.getElementById('betAmount').value = bet.betAmount;
+            document.getElementById('startDate').value = bet.startDate;
+            document.getElementById('endDate').value = bet.endDate;
+            
+            if (confirm(`要編輯 ${bet.playerName} 的賭注嗎？請修改上方表單後點擊「更新賭注」。\n\n要先刪除原賭注嗎？`)) {
+                await deleteBet(betId);
+            }
+            
+            // 暫時改變按鈕文字提示用戶
+            const btn = document.getElementById('placeBetBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '更新賭注 (編輯模式)';
+            btn.style.background = 'linear-gradient(135deg, #f6ad55, #ed8936)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(135deg, #4299e1, #3182ce)';
+            }, 10000);
         }
 
         // 頁面載入後自動連接
