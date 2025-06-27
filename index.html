@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -36,6 +35,16 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
         
+        .sync-status {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
         .betting-form {
             background: #f7fafc;
             padding: 25px;
@@ -62,6 +71,7 @@
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s ease;
+            box-sizing: border-box;
         }
         
         input:focus, select:focus {
@@ -92,6 +102,12 @@
         .calculate-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(66, 153, 225, 0.3);
+        }
+        
+        .calculate-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .result {
@@ -185,12 +201,6 @@
             min-width: 0;
         }
         
-        .bet-odds {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #e53e3e;
-        }
-        
         .winner {
             background: linear-gradient(135deg, #48bb78, #38a169);
             color: white;
@@ -215,6 +225,87 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        
+        .data-management {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #805ad5, #6b46c1);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .data-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .data-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .share-section {
+            background: linear-gradient(135deg, #38b2ac, #319795);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .share-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .share-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4299e1;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -222,6 +313,29 @@
         <div class="header">
             <h1>🏪 全家便利商店開幕賭盤</h1>
             <p>預測隔壁全家何時開幕，區間越短賠率越高！</p>
+        </div>
+        
+        <div class="sync-status">
+            ✨ 已準備就緒！使用匯出/匯入功能來同步資料
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalBets">0</div>
+                <div class="stat-label">總賭注數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAmount">$0</div>
+                <div class="stat-label">總下注金額</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgOdds">0x</div>
+                <div class="stat-label">平均賠率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPrize">$0</div>
+                <div class="stat-label">總獎金池</div>
+            </div>
         </div>
         
         <div class="betting-form">
@@ -251,7 +365,7 @@
                 <small style="color: #666; margin-top: 5px; display: block;">選擇你認為全家可能開幕的日期區間</small>
             </div>
             
-            <button class="calculate-btn" onclick="placeBet()">計算賠率並下注</button>
+            <button class="calculate-btn" onclick="placeBet()" id="placeBetBtn">計算賠率並下注</button>
             
             <div id="result" class="result"></div>
         </div>
@@ -261,8 +375,28 @@
             <div id="betsList"></div>
         </div>
         
+        <div class="data-management">
+            <h4>📁 資料管理</h4>
+            <p>使用以下功能來備份和分享賭盤資料</p>
+            <button class="data-btn" onclick="exportData()">📤 匯出資料</button>
+            <button class="data-btn" onclick="importData()">📥 匯入資料</button>
+            <button class="data-btn" onclick="clearAllData()">🗑️ 清空資料</button>
+            <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFileImport(event)">
+        </div>
+        
+        <div class="share-section">
+            <h4>🚀 部署分享</h4>
+            <p>想要分享給朋友？把這個 HTML 檔案上傳到 GitHub Pages！</p>
+            <button class="share-btn" onclick="showDeployInstructions()">📋 查看部署教學</button>
+            <button class="share-btn" onclick="copyPageHTML()">📄 複製網頁程式碼</button>
+        </div>
+        
         <div class="betting-form">
             <h3>🎉 開獎</h3>
+            <div class="form-group">
+                <label for="adminPassword">開盤密碼：</label>
+                <input type="password" id="adminPassword" placeholder="請輸入開盤密碼">
+            </div>
             <div class="form-group">
                 <label for="actualDate">實際開幕日期：</label>
                 <input type="date" id="actualDate">
@@ -276,20 +410,44 @@
         let bets = [];
         let gameEnded = false;
 
+        // 載入保存的資料
+        function loadSavedData() {
+            const savedData = localStorage.getItem('familyMartBetting');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    bets = data.bets || [];
+                    gameEnded = data.gameEnded || false;
+                    updateBetsList();
+                    updateGameState();
+                    updateStats();
+                    
+                    if (gameEnded && data.actualDate) {
+                        displayFinalResult(data.actualDate);
+                    }
+                } catch (error) {
+                    console.error('載入資料失敗:', error);
+                }
+            }
+        }
+
+        // 保存資料
+        function saveData() {
+            const data = {
+                bets: bets,
+                gameEnded: gameEnded,
+                actualDate: gameEnded ? document.getElementById('actualDate').value : null,
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem('familyMartBetting', JSON.stringify(data));
+        }
+
         function calculateOdds(startDate, endDate) {
-            // 計算區間天數
             const start = new Date(startDate);
             const end = new Date(endDate);
             const range = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            
-            // 基礎賠率計算：區間越短，賠率越高
-            // 假設總期望區間為90天（3個月），基礎賠率 = 90 / 區間長度
             const baseOdds = Math.max(90 / range, 1.1);
-            
-            // 加上一些變化讓賠率更有趣
-            const finalOdds = Math.round(baseOdds * 10) / 10;
-            
-            return finalOdds;
+            return Math.round(baseOdds * 10) / 10;
         }
 
         function formatDate(dateString) {
@@ -318,7 +476,6 @@
                 return;
             }
 
-            // 檢查日期不能是過去
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (new Date(startDate) < today) {
@@ -336,7 +493,8 @@
                 startDate,
                 endDate,
                 odds,
-                potentialWin
+                potentialWin,
+                timestamp: Date.now()
             };
 
             bets.push(bet);
@@ -352,7 +510,9 @@
             document.getElementById('result').style.display = 'block';
 
             updateBetsList();
+            updateStats();
             clearForm();
+            saveData();
         }
 
         function updateBetsList() {
@@ -365,8 +525,7 @@
 
             let html = '';
             
-            for (let i = 0; i < bets.length; i++) {
-                const bet = bets[i];
+            bets.forEach(bet => {
                 const rangeDays = Math.ceil((new Date(bet.endDate) - new Date(bet.startDate)) / (1000 * 60 * 60 * 24)) + 1;
                 
                 if (bet.editing === true) {
@@ -407,15 +566,29 @@
                                 ${bet.isWinner ? ' - 🎉 獲勝！' : ''}
                             </div>
                             <div class="bet-actions">
-                                <button class="edit-btn" onclick="editBet(${bet.id})">✏️ 編輯</button>
-                                <button class="delete-btn" onclick="deleteBet(${bet.id})">🗑️ 刪除</button>
+                                ${gameEnded ? '' : `
+                                    <button class="edit-btn" onclick="editBet(${bet.id})">✏️ 編輯</button>
+                                    <button class="delete-btn" onclick="deleteBet(${bet.id})">🗑️ 刪除</button>
+                                `}
                             </div>
                         </div>
                     `;
                 }
-            }
+            });
             
             betsList.innerHTML = html;
+        }
+
+        function updateStats() {
+            const totalBets = bets.length;
+            const totalAmount = bets.reduce((sum, bet) => sum + bet.betAmount, 0);
+            const avgOdds = totalBets > 0 ? (bets.reduce((sum, bet) => sum + bet.odds, 0) / totalBets).toFixed(1) : 0;
+            const totalPrize = bets.reduce((sum, bet) => sum + bet.potentialWin, 0);
+
+            document.getElementById('totalBets').textContent = totalBets;
+            document.getElementById('totalAmount').textContent = `$${totalAmount}`;
+            document.getElementById('avgOdds').textContent = `${avgOdds}x`;
+            document.getElementById('totalPrize').textContent = `$${totalPrize}`;
         }
 
         function editBet(betId) {
@@ -453,7 +626,6 @@
                 return;
             }
 
-            // 更新資料
             bet.playerName = newName;
             bet.betAmount = newAmount;
             bet.startDate = newStartDate;
@@ -463,17 +635,28 @@
             bet.editing = false;
 
             updateBetsList();
+            updateStats();
+            saveData();
         }
 
         function deleteBet(betId) {
             if (confirm('確定要刪除這筆賭注嗎？')) {
                 bets = bets.filter(bet => bet.id !== betId);
                 updateBetsList();
+                updateStats();
+                saveData();
             }
         }
 
         function announceResult() {
+            const adminPassword = document.getElementById('adminPassword').value;
             const actualDate = document.getElementById('actualDate').value;
+            
+            if (adminPassword !== 'tony123') {
+                alert('❌ 開盤密碼錯誤！');
+                document.getElementById('adminPassword').value = '';
+                return;
+            }
             
             if (!actualDate) {
                 alert('請輸入開幕日期！');
@@ -483,21 +666,27 @@
             gameEnded = true;
             
             const actualDateObj = new Date(actualDate);
+            const winners = [];
             
-            // 計算獲勝者
-            const winners = bets.filter(bet => {
-                const startDateObj = new Date(bet.startDate);
-                const endDateObj = new Date(bet.endDate);
-                return actualDateObj >= startDateObj && actualDateObj <= endDateObj;
-            });
-
-            // 標記獲勝者
             bets.forEach(bet => {
                 const startDateObj = new Date(bet.startDate);
                 const endDateObj = new Date(bet.endDate);
                 bet.isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
+                
+                if (bet.isWinner) {
+                    winners.push(bet);
+                }
             });
 
+            displayFinalResult(actualDate);
+            updateBetsList();
+            updateGameState();
+            saveData();
+        }
+
+        function displayFinalResult(actualDate) {
+            const winners = bets.filter(bet => bet.isWinner);
+            
             let resultHTML = `<h3>🎊 開獎結果</h3>`;
             resultHTML += `<p><strong>全家便利商店在 ${formatDate(actualDate)} 開幕！</strong></p>`;
             
@@ -519,8 +708,114 @@
 
             document.getElementById('finalResult').innerHTML = resultHTML;
             document.getElementById('finalResult').style.display = 'block';
+        }
+
+        function updateGameState() {
+            const placeBetBtn = document.getElementById('placeBetBtn');
             
-            updateBetsList();
+            if (gameEnded) {
+                placeBetBtn.disabled = true;
+                placeBetBtn.textContent = '遊戲已結束';
+            } else {
+                placeBetBtn.disabled = false;
+                placeBetBtn.textContent = '計算賠率並下注';
+            }
+        }
+
+        function exportData() {
+            const data = {
+                bets: bets,
+                gameEnded: gameEnded,
+                actualDate: gameEnded ? document.getElementById('actualDate').value : null,
+                exportTime: new Date().toISOString(),
+                version: '2.0'
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `family-mart-betting-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            alert('資料已匯出！可以分享給其他人或作為備份。');
+        }
+
+        function importData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.bets && Array.isArray(data.bets)) {
+                        if (confirm('匯入資料將覆蓋現有資料，確定要繼續嗎？')) {
+                            bets = data.bets;
+                            gameEnded = data.gameEnded || false;
+                            
+                            if (data.actualDate) {
+                                document.getElementById('actualDate').value = data.actualDate;
+                            }
+                            
+                            updateBetsList();
+                            updateStats();
+                            updateGameState();
+                            saveData();
+                            alert('資料匯入成功！');
+                            
+                            if (gameEnded && data.actualDate) {
+                                displayFinalResult(data.actualDate);
+                            }
+                        }
+                    } else {
+                        alert('檔案格式不正確！');
+                    }
+                } catch (error) {
+                    alert('檔案讀取失敗：' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('確定要清空所有資料嗎？此操作無法復原！')) {
+                bets = [];
+                gameEnded = false;
+                localStorage.removeItem('familyMartBetting');
+                updateBetsList();
+                updateStats();
+                updateGameState();
+                document.getElementById('finalResult').style.display = 'none';
+                alert('所有資料已清空！');
+            }
+        }
+
+        function showDeployInstructions() {
+            alert(`🚀 GitHub Pages 部署教學：
+
+1. 複製這個網頁的完整程式碼
+2. 到 GitHub 建立新的 repository
+3. 建立 index.html 檔案並貼上程式碼
+4. 到 Settings > Pages 啟用 GitHub Pages
+5. 幾分鐘後就有網址可以分享了！
+
+詳細步驟可以問 ChatGPT 或 Google "GitHub Pages 教學"`);
+        }
+
+        function copyPageHTML() {
+            const html = document.documentElement.outerHTML;
+            navigator.clipboard.writeText(html).then(() => {
+                alert('✅ 網頁程式碼已複製到剪貼簿！可以貼到記事本存成 .html 檔案。');
+            }).catch(() => {
+                alert('❌ 複製失敗，請手動選取網頁內容複製。');
+            });
         }
 
         function clearForm() {
@@ -530,8 +825,12 @@
             document.getElementById('endDate').value = '';
         }
 
-        // 初始化顯示
-        updateBetsList();
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedData();
+            updateStats();
+            updateGameState();
+        });
     </script>
 </body>
 </html>
