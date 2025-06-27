@@ -523,7 +523,25 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
             const start = new Date(startDate);
             const end = new Date(endDate);
             const range = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            const baseOdds = Math.max(90 / range, 1.1);
+            
+            // 更合理的賠率系統：區間越小賠率越高，但不會太誇張
+            let baseOdds;
+            if (range === 1) {
+                baseOdds = 8;   // 1天 = 8倍
+            } else if (range <= 3) {
+                baseOdds = 4;   // 2-3天 = 4倍
+            } else if (range <= 7) {
+                baseOdds = 2.5; // 4-7天 = 2.5倍
+            } else if (range <= 14) {
+                baseOdds = 2;   // 8-14天 = 2倍
+            } else if (range <= 30) {
+                baseOdds = 1.5; // 15-30天 = 1.5倍
+            } else if (range <= 60) {
+                baseOdds = 1.3; // 31-60天 = 1.3倍
+            } else {
+                baseOdds = 1.1; // 60天以上 = 1.1倍
+            }
+            
             return Math.round(baseOdds * 10) / 10;
         }
 
