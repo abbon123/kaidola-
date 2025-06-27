@@ -59,29 +59,32 @@
             color: white;
         }
         
-        .config-section {
+        .create-table-section {
             background: #fef5e7;
             border: 2px solid #f6ad55;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
+            display: none;
         }
         
-        .config-section h3 {
+        .create-table-section h3 {
             color: #c05621;
             margin-top: 0;
         }
         
-        .config-input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #d69e2e;
+        .sql-code {
+            background: #f4f4f4;
+            padding: 15px;
             border-radius: 5px;
             font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin: 10px 0;
         }
         
-        .config-btn {
+        .retry-btn {
             background: #d69e2e;
             color: white;
             padding: 10px 20px;
@@ -184,34 +187,6 @@
             min-height: 60px;
         }
         
-        .bet-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-left: 15px;
-            flex-shrink: 0;
-            min-width: 80px;
-        }
-        
-        .edit-btn, .delete-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .edit-btn {
-            background: #4299e1;
-            color: white;
-        }
-        
-        .delete-btn {
-            background: #e53e3e;
-            color: white;
-        }
-        
         .bet-info {
             flex: 1;
             min-width: 0;
@@ -274,6 +249,7 @@
             border-radius: 15px;
             margin: 20px 0;
             text-align: center;
+            display: none;
         }
         
         .deploy-btn {
@@ -301,44 +277,44 @@
         
         <div id="syncStatus" class="sync-status connecting">
             <span class="offline-indicator"></span>
-            🔄 正在初始化...
+            🔄 正在連接資料庫...
         </div>
         
-        <div id="configSection" class="config-section">
-            <h3>🔧 Supabase 設定</h3>
-            <p>要啟用即時同步，請輸入你的 Supabase 設定：</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                    <label>Supabase URL:</label>
-                    <input type="text" id="supabaseUrl" class="config-input" 
-                           placeholder="https://xxx.supabase.co"
-                           value="https://sgvdqekhfmxbdlmhzxle.supabase.co">
-                </div>
-                <div>
-                    <label>API Key:</label>
-                    <input type="text" id="supabaseKey" class="config-input" 
-                           placeholder="eyJhbGc..."
-                           value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndmRxZWtoZm14YmRsbWh6eGxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwMTQwMTQsImV4cCI6MjA2NjU5MDAxNH0.yoBCi83-8_vRfUUa1PuHLpxeJthq7meULZqRoihYd3U">
-                </div>
-            </div>
-            <button class="config-btn" onclick="connectToSupabase()">🔗 連接 Supabase</button>
-            <button class="config-btn" onclick="useOfflineMode()">📱 使用離線模式</button>
-            
-            <details style="margin-top: 15px;">
-                <summary style="cursor: pointer; color: #c05621; font-weight: bold;">📋 如何設定 Supabase？</summary>
-                <div style="margin-top: 10px; font-size: 14px;">
-                    <ol>
-                        <li>到 <a href="https://supabase.com" target="_blank">supabase.com</a> 註冊</li>
-                        <li>建立新專案</li>
-                        <li>到 Settings > API 取得 URL 和 anon key</li>
-                        <li>到 SQL Editor 執行建表指令（程式會提供）</li>
-                        <li>貼上設定到上面的欄位並點擊連接</li>
-                    </ol>
-                </div>
-            </details>
+        <div id="createTableSection" class="create-table-section">
+            <h3>📋 需要建立資料表</h3>
+            <p>請到 Supabase SQL Editor 執行以下指令：</p>
+            <div class="sql-code">CREATE TABLE IF NOT EXISTS bets (
+    id BIGSERIAL PRIMARY KEY,
+    player_name TEXT NOT NULL,
+    bet_amount INTEGER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    odds DECIMAL NOT NULL,
+    potential_win INTEGER NOT NULL,
+    is_winner BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS game_state (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    game_ended BOOLEAN DEFAULT FALSE,
+    actual_date DATE,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO game_state (id, game_ended) VALUES (1, FALSE) ON CONFLICT (id) DO NOTHING;
+
+-- 設定 RLS
+ALTER TABLE bets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE game_state ENABLE ROW LEVEL SECURITY;
+
+-- 允許所有操作的政策
+CREATE POLICY "Enable all operations for bets" ON bets FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING (true) WITH CHECK (true);</div>
+            <button class="retry-btn" onclick="connectToSupabase()">執行完成後重新連接</button>
         </div>
         
-        <div class="deploy-info" id="deployInfo" style="display: none;">
+        <div class="deploy-info" id="deployInfo">
             <h4>🚀 部署到 GitHub Pages</h4>
             <p>要讓朋友也能使用，把這個網頁部署到 GitHub Pages：</p>
             <button class="deploy-btn" onclick="copyHTML()">📄 複製網頁程式碼</button>
@@ -372,14 +348,14 @@
                 <small style="color: #666; margin-top: 5px; display: block;">選擇你認為全家可能開幕的日期區間</small>
             </div>
             
-            <button class="calculate-btn" onclick="placeBet()" id="placeBetBtn" disabled>請先設定連接</button>
+            <button class="calculate-btn" onclick="placeBet()" id="placeBetBtn" disabled>連接中...</button>
             
             <div id="result" class="result"></div>
         </div>
         
         <div class="bets-list">
             <h3>📊 目前賭注 <span id="betCount">(0)</span></h3>
-            <div id="betsList">等待連接...</div>
+            <div id="betsList">連接中...</div>
         </div>
         
         <div class="betting-form">
@@ -405,6 +381,10 @@
         let gameEnded = false;
         let isConnected = false;
 
+        // Supabase 設定
+        const SUPABASE_URL = "https://sgvdqekhfmxbdlmhzxle.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndmRxZWtoZm14YmRsbWh6eGxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwMTQwMTQsImV4cCI6MjA2NjU5MDAxNH0.yoBCi83-8_vRfUUa1PuHLpxeJthq7meULZqRoihYd3U";
+
         function updateSyncStatus(status, message, isOnline = false) {
             const statusEl = document.getElementById('syncStatus');
             const indicator = isOnline ? 
@@ -416,19 +396,11 @@
         }
 
         async function connectToSupabase() {
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
-            
-            if (!url || !key) {
-                alert('請填寫 Supabase URL 和 API Key');
-                return;
-            }
-            
             try {
                 updateSyncStatus('connecting', '🔄 正在連接 Supabase...');
                 
                 // 建立 Supabase 客戶端
-                supabase = window.supabase.createClient(url, key);
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
                 // 測試連接
                 const { data, error } = await supabase
@@ -438,17 +410,17 @@
                 if (error) {
                     if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
                         updateSyncStatus('error', '⚠️ 需要建立資料表');
-                        showCreateTableInstructions();
+                        document.getElementById('createTableSection').style.display = 'block';
                         return;
                     }
                     throw error;
                 }
                 
                 isConnected = true;
-                updateSyncStatus('connected', '✅ Supabase 連接成功！即時同步已啟用', true);
+                updateSyncStatus('connected', '✅ 資料庫連接成功！即時同步已啟用', true);
                 
-                // 隱藏設定區域
-                document.getElementById('configSection').style.display = 'none';
+                // 隱藏建立資料表提示
+                document.getElementById('createTableSection').style.display = 'none';
                 document.getElementById('deployInfo').style.display = 'block';
                 
                 // 啟用功能
@@ -463,18 +435,12 @@
             } catch (error) {
                 updateSyncStatus('error', '❌ 連接失敗: ' + error.message);
                 console.error('Supabase 連接失敗:', error);
+                
+                // 3秒後自動重試
+                setTimeout(() => {
+                    connectToSupabase();
+                }, 3000);
             }
-        }
-
-        function useOfflineMode() {
-            updateSyncStatus('error', '📱 離線模式 - 資料僅保存在本地');
-            document.getElementById('configSection').style.display = 'none';
-            document.getElementById('deployInfo').style.display = 'block';
-            
-            document.getElementById('placeBetBtn').disabled = false;
-            document.getElementById('placeBetBtn').textContent = '計算賠率並下注';
-            
-            loadLocalData();
         }
 
         function setupRealtimeListeners() {
@@ -495,46 +461,6 @@
                     loadGameState();
                 })
                 .subscribe();
-        }
-
-        function showCreateTableInstructions() {
-            const instructions = `
-                <div style="background: #fef5e7; padding: 15px; border-radius: 10px; margin: 10px 0;">
-                    <h4>📋 請到 Supabase SQL Editor 執行：</h4>
-                    <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
-CREATE TABLE IF NOT EXISTS bets (
-    id BIGSERIAL PRIMARY KEY,
-    player_name TEXT NOT NULL,
-    bet_amount INTEGER NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    odds DECIMAL NOT NULL,
-    potential_win INTEGER NOT NULL,
-    is_winner BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS game_state (
-    id INTEGER PRIMARY KEY DEFAULT 1,
-    game_ended BOOLEAN DEFAULT FALSE,
-    actual_date DATE,
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-INSERT INTO game_state (id, game_ended) VALUES (1, FALSE) ON CONFLICT (id) DO NOTHING;
-
--- 設定 RLS
-ALTER TABLE bets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE game_state ENABLE ROW LEVEL SECURITY;
-
--- 允許所有操作的政策
-CREATE POLICY "Enable all operations for bets" ON bets FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING (true) WITH CHECK (true);
-                    </pre>
-                    <button onclick="connectToSupabase()" style="background: #48bb78; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer;">執行完成後重新連接</button>
-                </div>
-            `;
-            document.getElementById('betsList').innerHTML = instructions;
         }
 
         async function loadBets() {
@@ -593,37 +519,6 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
             }
         }
 
-        function loadLocalData() {
-            const savedData = localStorage.getItem('familyMartBetting');
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    bets = data.bets || [];
-                    gameEnded = data.gameEnded || false;
-                    updateBetsList();
-                    updateGameState();
-                    
-                    if (gameEnded && data.actualDate) {
-                        displayFinalResult(data.actualDate);
-                    }
-                } catch (error) {
-                    console.error('載入本地資料失敗:', error);
-                }
-            } else {
-                updateBetsList();
-            }
-        }
-
-        function saveLocalData() {
-            const data = {
-                bets: bets,
-                gameEnded: gameEnded,
-                actualDate: gameEnded ? document.getElementById('actualDate').value : null,
-                lastUpdated: new Date().toISOString()
-            };
-            localStorage.setItem('familyMartBetting', JSON.stringify(data));
-        }
-
         function calculateOdds(startDate, endDate) {
             const start = new Date(startDate);
             const end = new Date(endDate);
@@ -640,6 +535,11 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
         async function placeBet() {
             if (gameEnded) {
                 alert('遊戲已結束，無法再下注！');
+                return;
+            }
+
+            if (!isConnected) {
+                alert('資料庫未連接，請稍後再試！');
                 return;
             }
 
@@ -672,35 +572,18 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
                 document.getElementById('placeBetBtn').disabled = true;
                 document.getElementById('placeBetBtn').textContent = '下注中...';
 
-                if (isConnected) {
-                    const { data, error } = await supabase
-                        .from('bets')
-                        .insert([{
-                            player_name: playerName,
-                            bet_amount: betAmount,
-                            start_date: startDate,
-                            end_date: endDate,
-                            odds: odds,
-                            potential_win: potentialWin
-                        }]);
-                    
-                    if (error) throw error;
-                } else {
-                    // 離線模式
-                    const bet = {
-                        id: Date.now(),
-                        playerName,
-                        betAmount,
-                        startDate,
-                        endDate,
-                        odds,
-                        potentialWin,
-                        isWinner: false
-                    };
-                    bets.push(bet);
-                    updateBetsList();
-                    saveLocalData();
-                }
+                const { data, error } = await supabase
+                    .from('bets')
+                    .insert([{
+                        player_name: playerName,
+                        bet_amount: betAmount,
+                        start_date: startDate,
+                        end_date: endDate,
+                        odds: odds,
+                        potential_win: potentialWin
+                    }]);
+                
+                if (error) throw error;
 
                 const rangeDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
                 
@@ -767,41 +650,35 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
                 return;
             }
 
+            if (!isConnected) {
+                alert('資料庫未連接，無法開獎！');
+                return;
+            }
+
             try {
                 gameEnded = true;
                 const actualDateObj = new Date(actualDate);
                 
-                if (isConnected) {
-                    // 更新所有賭注的獲勝狀態
-                    for (const bet of bets) {
-                        const startDateObj = new Date(bet.startDate);
-                        const endDateObj = new Date(bet.endDate);
-                        const isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
-                        
-                        await supabase
-                            .from('bets')
-                            .update({ is_winner: isWinner })
-                            .eq('id', bet.id);
-                    }
+                // 更新所有賭注的獲勝狀態
+                for (const bet of bets) {
+                    const startDateObj = new Date(bet.startDate);
+                    const endDateObj = new Date(bet.endDate);
+                    const isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
                     
-                    // 更新遊戲狀態
                     await supabase
-                        .from('game_state')
-                        .update({ 
-                            game_ended: true, 
-                            actual_date: actualDate 
-                        })
-                        .eq('id', 1);
-                } else {
-                    // 離線模式
-                    bets.forEach(bet => {
-                        const startDateObj = new Date(bet.startDate);
-                        const endDateObj = new Date(bet.endDate);
-                        bet.isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
-                    });
-                    updateBetsList();
-                    saveLocalData();
+                        .from('bets')
+                        .update({ is_winner: isWinner })
+                        .eq('id', bet.id);
                 }
+                
+                // 更新遊戲狀態
+                await supabase
+                    .from('game_state')
+                    .update({ 
+                        game_ended: true, 
+                        actual_date: actualDate 
+                    })
+                    .eq('id', 1);
 
                 displayFinalResult(actualDate);
                 updateGameState();
@@ -845,7 +722,7 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
             if (gameEnded) {
                 placeBetBtn.disabled = true;
                 placeBetBtn.textContent = '遊戲已結束';
-            } else if (placeBetBtn.textContent !== '下注中...') {
+            } else if (placeBetBtn.textContent !== '下注中...' && isConnected) {
                 placeBetBtn.disabled = false;
                 placeBetBtn.textContent = '計算賠率並下注';
             }
@@ -876,12 +753,12 @@ CREATE POLICY "Enable all operations for game_state" ON game_state FOR ALL USING
 4. 到 Settings > Pages 選擇 main branch
 5. 等幾分鐘就有網址了！
 
-部署後所有人都能訪問，而且 Supabase 連接會正常運作！`);
+部署後所有人都能訪問，資料庫連接會正常運作！`);
         }
 
-        // 初始化
+        // 頁面載入後自動連接
         document.addEventListener('DOMContentLoaded', () => {
-            updateSyncStatus('connecting', '🔄 等待設定...');
+            connectToSupabase();
         });
     </script>
 </body>
