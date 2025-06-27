@@ -1,0 +1,537 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全家便利商店開幕賭盤</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .betting-form {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #4299e1;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(66, 153, 225, 0.3);
+        }
+        
+        .result {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            display: none;
+        }
+        
+        .bets-list {
+            margin-top: 30px;
+        }
+        
+        .bet-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #4299e1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            min-height: 60px;
+        }
+        
+        .bet-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 15px;
+            flex-shrink: 0;
+            min-width: 80px;
+        }
+        
+        .edit-btn, .delete-btn, .save-btn, .cancel-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .delete-btn {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .save-btn {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: #718096;
+            color: white;
+        }
+        
+        .edit-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .edit-inputs input {
+            padding: 5px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .edit-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .bet-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .bet-odds {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #e53e3e;
+        }
+        
+        .winner {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border-left-color: #68d391;
+        }
+        
+        .final-result {
+            background: #2d3748;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .result-btn {
+            background: #e53e3e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 全家便利商店開幕賭盤</h1>
+            <p>預測隔壁全家何時開幕，區間越短賠率越高！</p>
+        </div>
+        
+        <div class="betting-form">
+            <h3>🎯 下注區</h3>
+            <div class="form-group">
+                <label for="playerName">玩家姓名：</label>
+                <input type="text" id="playerName" placeholder="輸入你的名字">
+            </div>
+            
+            <div class="form-group">
+                <label for="betAmount">下注金額：</label>
+                <input type="number" id="betAmount" placeholder="輸入下注金額" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label>預測區間：</label>
+                <div class="range-inputs">
+                    <div>
+                        <label for="startDate">開始日期：</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div>
+                        <label for="endDate">結束日期：</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <small style="color: #666; margin-top: 5px; display: block;">選擇你認為全家可能開幕的日期區間</small>
+            </div>
+            
+            <button class="calculate-btn" onclick="placeBet()">計算賠率並下注</button>
+            
+            <div id="result" class="result"></div>
+        </div>
+        
+        <div class="bets-list">
+            <h3>📊 目前賭注</h3>
+            <div id="betsList"></div>
+        </div>
+        
+        <div class="betting-form">
+            <h3>🎉 開獎</h3>
+            <div class="form-group">
+                <label for="actualDate">實際開幕日期：</label>
+                <input type="date" id="actualDate">
+            </div>
+            <button class="result-btn" onclick="announceResult()">開獎</button>
+            <div id="finalResult" class="final-result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let bets = [];
+        let gameEnded = false;
+
+        function calculateOdds(startDate, endDate) {
+            // 計算區間天數
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const range = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            
+            // 基礎賠率計算：區間越短，賠率越高
+            // 假設總期望區間為90天（3個月），基礎賠率 = 90 / 區間長度
+            const baseOdds = Math.max(90 / range, 1.1);
+            
+            // 加上一些變化讓賠率更有趣
+            const finalOdds = Math.round(baseOdds * 10) / 10;
+            
+            return finalOdds;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+
+        function placeBet() {
+            if (gameEnded) {
+                alert('遊戲已結束，無法再下注！');
+                return;
+            }
+
+            const playerName = document.getElementById('playerName').value.trim();
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!playerName || !betAmount || !startDate || !endDate) {
+                alert('請填寫完整資訊！');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('結束日期必須晚於或等於開始日期！');
+                return;
+            }
+
+            // 檢查日期不能是過去
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (new Date(startDate) < today) {
+                alert('開始日期不能是過去的日期！');
+                return;
+            }
+
+            const odds = calculateOdds(startDate, endDate);
+            const potentialWin = Math.round(betAmount * odds);
+
+            const bet = {
+                id: Date.now(),
+                playerName,
+                betAmount,
+                startDate,
+                endDate,
+                odds,
+                potentialWin
+            };
+
+            bets.push(bet);
+            
+            const rangeDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+            
+            document.getElementById('result').innerHTML = `
+                <strong>${playerName}</strong> 下注成功！<br>
+                預測區間：${formatDate(startDate)} - ${formatDate(endDate)} (${rangeDays} 天)<br>
+                賠率：${odds}x<br>
+                可能獲得：$${potentialWin}
+            `;
+            document.getElementById('result').style.display = 'block';
+
+            updateBetsList();
+            clearForm();
+        }
+
+        function updateBetsList() {
+            const betsList = document.getElementById('betsList');
+            
+            if (bets.length === 0) {
+                betsList.innerHTML = '<p style="text-align: center; color: #666;">目前還沒有人下注</p>';
+                return;
+            }
+
+            let html = '';
+            
+            for (let i = 0; i < bets.length; i++) {
+                const bet = bets[i];
+                const rangeDays = Math.ceil((new Date(bet.endDate) - new Date(bet.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                
+                if (bet.editing === true) {
+                    html += `
+                        <div class="bet-item ${bet.isWinner ? 'winner' : ''}">
+                            <div class="bet-info" style="flex: 1;">
+                                <div class="edit-inputs">
+                                    <div class="edit-row">
+                                        <label>姓名：</label>
+                                        <input type="text" id="edit-name-${bet.id}" value="${bet.playerName}">
+                                    </div>
+                                    <div class="edit-row">
+                                        <label>金額：</label>
+                                        <input type="number" id="edit-amount-${bet.id}" value="${bet.betAmount}">
+                                    </div>
+                                    <div class="edit-row">
+                                        <label>開始：</label>
+                                        <input type="date" id="edit-start-${bet.id}" value="${bet.startDate}">
+                                        <label>結束：</label>
+                                        <input type="date" id="edit-end-${bet.id}" value="${bet.endDate}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bet-actions">
+                                <button class="save-btn" onclick="saveBet(${bet.id})">儲存</button>
+                                <button class="cancel-btn" onclick="cancelEdit(${bet.id})">取消</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="bet-item ${bet.isWinner ? 'winner' : ''}">
+                            <div class="bet-info">
+                                <strong>${bet.playerName}</strong> - 
+                                ${formatDate(bet.startDate)} - ${formatDate(bet.endDate)} 
+                                (${rangeDays} 天區間)<br>
+                                下注：$${bet.betAmount} | 賠率：${bet.odds}x | 可贏：$${bet.potentialWin}
+                                ${bet.isWinner ? ' - 🎉 獲勝！' : ''}
+                            </div>
+                            <div class="bet-actions">
+                                <button class="edit-btn" onclick="editBet(${bet.id})">✏️ 編輯</button>
+                                <button class="delete-btn" onclick="deleteBet(${bet.id})">🗑️ 刪除</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            betsList.innerHTML = html;
+        }
+
+        function editBet(betId) {
+            const bet = bets.find(b => b.id === betId);
+            if (bet) {
+                bet.editing = true;
+                updateBetsList();
+            }
+        }
+
+        function cancelEdit(betId) {
+            const bet = bets.find(b => b.id === betId);
+            if (bet) {
+                bet.editing = false;
+                updateBetsList();
+            }
+        }
+
+        function saveBet(betId) {
+            const bet = bets.find(b => b.id === betId);
+            if (!bet) return;
+
+            const newName = document.getElementById(`edit-name-${betId}`).value.trim();
+            const newAmount = parseInt(document.getElementById(`edit-amount-${betId}`).value);
+            const newStartDate = document.getElementById(`edit-start-${betId}`).value;
+            const newEndDate = document.getElementById(`edit-end-${betId}`).value;
+
+            if (!newName || !newAmount || !newStartDate || !newEndDate) {
+                alert('請填寫完整資訊！');
+                return;
+            }
+
+            if (new Date(newStartDate) > new Date(newEndDate)) {
+                alert('結束日期必須晚於或等於開始日期！');
+                return;
+            }
+
+            // 更新資料
+            bet.playerName = newName;
+            bet.betAmount = newAmount;
+            bet.startDate = newStartDate;
+            bet.endDate = newEndDate;
+            bet.odds = calculateOdds(newStartDate, newEndDate);
+            bet.potentialWin = Math.round(newAmount * bet.odds);
+            bet.editing = false;
+
+            updateBetsList();
+        }
+
+        function deleteBet(betId) {
+            if (confirm('確定要刪除這筆賭注嗎？')) {
+                bets = bets.filter(bet => bet.id !== betId);
+                updateBetsList();
+            }
+        }
+
+        function announceResult() {
+            const actualDate = document.getElementById('actualDate').value;
+            
+            if (!actualDate) {
+                alert('請輸入開幕日期！');
+                return;
+            }
+
+            gameEnded = true;
+            
+            const actualDateObj = new Date(actualDate);
+            
+            // 計算獲勝者
+            const winners = bets.filter(bet => {
+                const startDateObj = new Date(bet.startDate);
+                const endDateObj = new Date(bet.endDate);
+                return actualDateObj >= startDateObj && actualDateObj <= endDateObj;
+            });
+
+            // 標記獲勝者
+            bets.forEach(bet => {
+                const startDateObj = new Date(bet.startDate);
+                const endDateObj = new Date(bet.endDate);
+                bet.isWinner = actualDateObj >= startDateObj && actualDateObj <= endDateObj;
+            });
+
+            let resultHTML = `<h3>🎊 開獎結果</h3>`;
+            resultHTML += `<p><strong>全家便利商店在 ${formatDate(actualDate)} 開幕！</strong></p>`;
+            
+            if (winners.length > 0) {
+                resultHTML += `<h4>🏆 獲勝者：</h4>`;
+                winners.forEach(winner => {
+                    resultHTML += `
+                        <p><strong>${winner.playerName}</strong> - 
+                        預測區間：${formatDate(winner.startDate)} - ${formatDate(winner.endDate)}<br>
+                        下注：$${winner.betAmount} → 獲得：$${winner.potentialWin}</p>
+                    `;
+                });
+                
+                const totalWinnings = winners.reduce((sum, winner) => sum + winner.potentialWin, 0);
+                resultHTML += `<p><strong>總獎金：$${totalWinnings}</strong></p>`;
+            } else {
+                resultHTML += `<p>😢 沒有人猜中，莊家通吃！</p>`;
+            }
+
+            document.getElementById('finalResult').innerHTML = resultHTML;
+            document.getElementById('finalResult').style.display = 'block';
+            
+            updateBetsList();
+        }
+
+        function clearForm() {
+            document.getElementById('playerName').value = '';
+            document.getElementById('betAmount').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+        }
+
+        // 初始化顯示
+        updateBetsList();
+    </script>
+</body>
+</html>
